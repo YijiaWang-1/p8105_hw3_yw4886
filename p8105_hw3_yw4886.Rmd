@@ -6,25 +6,30 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(p8105.datasets)
+library(patchwork)
+library(knitr)
 ```
 
-## R Markdown
+# Problem 1 — NY NOAA
+## Import and describe the dataset
+```{r}
+data("ny_noaa")
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+dim(ny_noaa)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+ny_noaa |>
+  summarize(
+    across(
+      c(prcp, snow, snwd, tmax, tmin),
+      ~ mean(is.na(.x)) * 100
+    )
+  ) |>
+  kable(digits = 1)
 ```
+### Dataset description
+The NY NOAA dataset contains `r nrow(ny_noaa)` observations and `r ncol(ny_noaa)` variables from `r n_distinct(ny_noaa$id)` weather stations in New York State. Each row represents a weather observation at a specific station on a particular date. The dataset includes station ID, date, precipitation (`prcp`), snowfall (`snow`), snow depth (`snwd`), maximum temperature (`tmax`), and minimum temperature (`tmin`).
 
-## Including Plots
+Missing data are an important issue. Approximately `r round(100 * mean(is.na(ny_noaa$tmax)), 1)`% of maximum temperature observations and `r round(100 * mean(is.na(ny_noaa$tmin)), 1)`% of minimum temperature observations are missing. The missing percentages are `r round(100 * mean(is.na(ny_noaa$prcp)), 1)`% for precipitation, `r round(100 * mean(is.na(ny_noaa$snow)), 1)`% for snowfall, and `r round(100 * mean(is.na(ny_noaa$snwd)), 1)`% for snow depth. This may affect comparisons across stations and years.
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
